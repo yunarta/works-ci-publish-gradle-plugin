@@ -140,7 +140,7 @@ tasks.create("createJacocoTestReport", JacocoReport::class.java) {
     )
 
     // sources
-    sourceDirectories = files(listOf("src/main/kotlin", "/src/test/groovy"))
+    sourceDirectories = files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy"))
     executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
 }
 
