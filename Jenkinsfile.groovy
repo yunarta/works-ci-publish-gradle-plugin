@@ -10,7 +10,6 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: buildCount))
         disableConcurrentBuilds()
-        retry(2)
     }
 
     stages {
@@ -20,17 +19,14 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh './gradlew assemble -q'
+        stage("Build Test") {
+            options {
+                retry(2)
             }
-        }
-
-        stage("Test") {
             steps {
-                sh './gradlew testWithCoverage -q'
+                sh './gradlew clean testWithCoverage -q'
                 junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
-                jacoco execPattern: '**/build/jacoco/*.exec', classPattern: '**/build/classes/**/main', sourcePattern: '**/src/main/**'
+                jacoco execPattern: '**/build/jacoco/*.exec', classPattern: '**/build/classes/**/main', sourcePattern: 'works-publish/src/main/kotlin'
             }
         }
 
@@ -38,6 +34,12 @@ pipeline {
             steps {
                 sh "./gradlew detektCheck -q"
                 checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/detekt-report.xml', unHealthy: ''
+            }
+        }
+
+        stage("Publish") {
+            steps {
+                codeCoverage()
             }
         }
 
@@ -55,6 +57,12 @@ def publish() {
     Map module = readJson file: 'works-publish/module.json'
     module["repo"] = "libs-gradle"
     module["path"] = "works-publish"
+}
+
+def codeCoverage() {
+    withCredentials([[$class: 'StringBinding', credentialsId: "codecov-token", variable: "CODECOV_TOKEN"]]) {
+        sh "curl -s https://codecov.io/bash | bash -s - -f works-publish/build/reports/createJacocoTestReport/createJacocoTestReport.xml"
+    }
 }
 
 def artifactoryPublish(Map config) {
