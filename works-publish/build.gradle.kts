@@ -22,6 +22,7 @@ config?.apply {
 
 apply {
     plugin("kotlin")
+    plugin("maven-publish")
 }
 
 val kotlinVersion: String by rootProject.extra
@@ -200,8 +201,8 @@ tasks.create("setupJacocoAgent") {
 
 tasks.withType<Test> {
     dependsOn("cleanTest", "createClasspathManifest")
+    ignoreFailures = project.extra.properties.getOrDefault("ignoreFailures", "false").toString().toBoolean()
 
-    ignoreFailures = true
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed", "standardOut", "standardError")
@@ -219,35 +220,38 @@ tasks.create("worksArchiveSources", Jar::class.java) {
     classifier = "sources"
     from(sourceSets["main"].java.srcDirs)
 }
+project.afterEvaluate {
+    extensions.findByType(PublishingExtension::class.java)?.let {
+        it.publications {
+            create("projectRelease", MavenPublication::class.java) {
+                artifactId = project.name
+                version = project.version.toString()
 
-extensions.findByType(PublishingExtension::class.java)?.let {
-    it.publications.create("projectRelease", MavenPublication::class.java) {
-        artifactId = project.name
-        version = project.version.toString()
-
-        artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
+                artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
 
 
-        pom.withXml {
-            val root = asNode()
+                pom.withXml {
+                    val root = asNode()
 
-            val license = root.appendNode("licenses").appendNode("license")
-            license.appendNode("name", "The Apache Software License, Version 2.0")
-            license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-            license.appendNode("distribution", "repo")
+                    val license = root.appendNode("licenses").appendNode("license")
+                    license.appendNode("name", "The Apache Software License, Version 2.0")
+                    license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    license.appendNode("distribution", "repo")
+                }
+            }
         }
     }
-}
 
-tasks.create("worksGeneratePom", Copy::class.java) {
+    tasks.create("worksGeneratePom", Copy::class.java) {
 
-    dependsOn("generatePomFileForProjectReleasePublication")
-    from("$buildDir/publications/projectRelease")
-    into("$buildDir/libs/")
-    rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
-}
+        dependsOn("generatePomFileForProjectReleasePublication")
+        from("$buildDir/publications/projectRelease")
+        into("$buildDir/libs/")
+        rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
+    }
 
-tasks.create("worksCreatePublication") {
-    group = "publishing"
-    dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
+    tasks.create("worksCreatePublication") {
+        group = "publishing"
+        dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
+    }
 }
