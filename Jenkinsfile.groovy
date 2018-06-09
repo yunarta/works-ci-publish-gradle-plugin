@@ -26,7 +26,7 @@ pipeline {
             steps {
                 sh './gradlew clean testWithCoverage -q'
                 junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
-                jacoco execPattern: 'works-publish/build/jacoco/*.exec', classPattern: 'works-publish/build/classes/**/main/*', sourcePattern: 'works-publish/src/main/**/*'
+                jacoco execPattern: 'works-publish/build/jacoco/*.exec', classPattern: 'works-publish/build/classes/**/main', sourcePattern: 'works-publish/src/main/kotlin,works-publish/src/main/java'
             }
         }
 
