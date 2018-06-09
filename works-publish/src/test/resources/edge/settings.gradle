@@ -1,0 +1,4 @@
+include ':java-with-dokka'
+include ':kotlin-with-javadoc'
+include ':unrelated-dokka-task'
+include ':checksum'

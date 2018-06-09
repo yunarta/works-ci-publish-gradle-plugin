@@ -1,0 +1,28 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'works-publish'
+
+version "1.0.0"
+
+publication {
+    javadoc = "kotlin"
+}
+
+android {
+    compileSdkVersion 26
+
+    defaultConfig {
+        applicationId 'com.android.sample'
+
+        minSdkVersion 14
+        targetSdkVersion 26
+
+        versionCode 1
+        versionName project.version
+    }
+
+    buildTypes {
+        release {
+        }
+    }
+}

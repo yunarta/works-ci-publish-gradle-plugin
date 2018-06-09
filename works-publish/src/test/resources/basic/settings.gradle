@@ -1,0 +1,6 @@
+include ':android-kotlin-app'
+include ':android-java-lib'
+include ':android-kotlin-lib'
+include ':java-lib'
+include ':kotlin-lib'
+include ':module-test'

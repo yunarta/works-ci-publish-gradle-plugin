@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'works-publish'
+apply plugin: 'org.jetbrains.dokka-android'
+
+version "1.0.0"
+
+publication {
+    javadoc = "kotlin"
+}
+
+android {
+    compileSdkVersion 26
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 26
+
+        versionCode 1
+        versionName project.version
+    }
+
+    buildTypes {
+        release {
+        }
+    }
+}

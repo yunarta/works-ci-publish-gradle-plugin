@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'works-publish'
+apply plugin: 'org.jetbrains.dokka'
+
+version '1.0.0'
+
+publication {
+    javadoc = "java"
+}
+
+sourceSets {
+    main {
+        java.srcDirs += ['src/main/kotlin']
+    }
+}

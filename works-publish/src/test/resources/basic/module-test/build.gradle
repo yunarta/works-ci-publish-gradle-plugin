@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+apply plugin: 'works-publish'
+
+group 'com.default'
+version '1.0.0'
+
+publication {
+    module = file("module.properties")
+}
