@@ -19,7 +19,8 @@ Usage:
 - Make sure group and version is there as for POM requirement
 - As for now a Java-Kotlin project must choose which Javadoc they wanted to use  
 
-Configure:
+## Configure
+
 ```groovy
 buildscript {
     dependencies {
@@ -43,8 +44,37 @@ publication {
 Parameter
 - javadoc: Define how the publish plugin should generated the JavaDoc.
 - includeTest: When set to true, test configuration dependencies will be included in output.
-- module: When provided with properties file containing group and version, the provided value will replace the project after Gradle evaluation. 
+- module: When provided with properties file containing group and version, the provided value will replace the project 
+after Gradle evaluation. 
+
+## Usage
 
 Execute:
 ```gradle worksGeneratePublication```
 
+Once the execution is finished, you will find all the output artifact in your build directory libs.
+This usually will consists of:
+- POM file
+- JAR or AAR binary
+- Archived source
+- Archived javadoc
+- MD5 checksum of JAR/AAR content and of POM file
+
+All the output are following the Maven 2 format in such
+- **POM** - group-artifact-version.pom
+- **POM Checksum** - group-artifact-version-pom.md5
+- **JAR Artifact** - group-artifact-version.jar
+- **AAR Artifact** - group-artifact-version.aar
+- **Artifact Checksum** - group-artifact-version.md5
+- **Javadoc** - group-artifact-version-javadoc.jar
+- **Source** - group-artifact-version-source.jar
+
+With this format, uploading to repository will be very easy especially with Jenkins CI
+
+## Continuous Integration
+
+The checksum output of the POM and Artifact can used to compare whether there are difference between one that you 
+stored in repository with the one that the CI just created. This way you may prevent uploading the artifact again
+and may prevent downstream build.
+
+Currently the MD5 checksum is still experimental.
