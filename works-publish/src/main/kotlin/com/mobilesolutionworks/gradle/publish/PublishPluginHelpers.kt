@@ -1,6 +1,5 @@
 package com.mobilesolutionworks.gradle.publish
 
-import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.plugins.ExtensionContainer
