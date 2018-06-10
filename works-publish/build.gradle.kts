@@ -77,6 +77,7 @@ dependencies {
     api(gradleApi())
     implementation(kotlin("stdlib-jdk8", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
+    implementation("commons-codec:commons-codec:1.11")
 
     compileOnly("org.jetbrains.dokka:dokka-gradle-plugin:0.9.17")
     compileOnly("com.android.tools.build:gradle:3.1.2") {
@@ -220,6 +221,7 @@ tasks.create("worksArchiveSources", Jar::class.java) {
     classifier = "sources"
     from(sourceSets["main"].java.srcDirs)
 }
+
 project.afterEvaluate {
     extensions.findByType(PublishingExtension::class.java)?.let {
         it.publications {
@@ -229,7 +231,6 @@ project.afterEvaluate {
 
                 artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
 
-
                 pom.withXml {
                     val root = asNode()
 
@@ -237,6 +238,15 @@ project.afterEvaluate {
                     license.appendNode("name", "The Apache Software License, Version 2.0")
                     license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
                     license.appendNode("distribution", "repo")
+
+                    val dependenciesNode = root.appendNode("dependencies")
+                    project.configurations.getAt("implementation").dependencies.forEach {
+                        val dependencyNode = dependenciesNode.appendNode("dependency")
+                        dependencyNode.appendNode("groupId", it.group)
+                        dependencyNode.appendNode("artifactId", it.name)
+                        dependencyNode.appendNode("version", it.version)
+                        dependencyNode.appendNode("scope", "runtime")
+                    }
                 }
             }
         }

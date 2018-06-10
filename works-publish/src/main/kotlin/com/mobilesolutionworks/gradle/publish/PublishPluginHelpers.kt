@@ -1,12 +1,10 @@
 package com.mobilesolutionworks.gradle.publish
 
+import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.plugins.ExtensionContainer
-import org.gradle.internal.impldep.org.apache.commons.codec.digest.Md5Crypt
-import org.gradle.internal.impldep.org.bouncycastle.jcajce.provider.digest.MD5
 import java.io.File
-import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.util.*
 import java.util.zip.ZipEntry
@@ -58,7 +56,7 @@ internal fun File.md5zip(destination: File) {
 }
 
 internal fun File.md5(
-        instance: MessageDigest = MD5.Digest(),
+        instance: MessageDigest = DigestUtils.getMd5Digest(),
         bufferSize: Int = DEFAULT_BUFFER_SIZE
 ): ByteArray {
     instance.reset()
@@ -85,7 +83,7 @@ private const val BIT_COUNT = 4
 fun md5zip(source: File, destination: File, exception: (File) -> ByteArray? = { null }): ByteArray {
     source.md5zip(destination)
 
-    val instance = MD5.Digest()
+    val instance = DigestUtils.getMd5Digest()
     val hashMap = TreeMap<String, ByteArray>()
 
     destination.walkTopDown().forEach {
