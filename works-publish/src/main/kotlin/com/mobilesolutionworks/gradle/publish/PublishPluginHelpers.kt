@@ -56,7 +56,7 @@ internal fun File.md5zip(destination: File) {
 }
 
 internal fun File.md5(
-        instance: MessageDigest = DigestUtils.getMd5Digest(),
+        instance: MessageDigest = MessageDigest.getInstance("MD5"),
         bufferSize: Int = DEFAULT_BUFFER_SIZE
 ): ByteArray {
     instance.reset()
@@ -83,7 +83,7 @@ private const val BIT_COUNT = 4
 fun md5zip(source: File, destination: File, exception: (File) -> ByteArray? = { null }): ByteArray {
     source.md5zip(destination)
 
-    val instance = DigestUtils.getMd5Digest()
+    val instance = MessageDigest.getInstance("MD5")
     val hashMap = TreeMap<String, ByteArray>()
 
     destination.walkTopDown().forEach {

@@ -77,7 +77,6 @@ dependencies {
     api(gradleApi())
     implementation(kotlin("stdlib-jdk8", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
-    implementation("commons-codec:commons-codec:1.11")
 
     compileOnly("org.jetbrains.dokka:dokka-gradle-plugin:0.9.17")
     compileOnly("com.android.tools.build:gradle:3.1.2") {
