@@ -152,6 +152,13 @@ tasks.create("testWithCoverage") {
     dependsOn("createJacocoTestReport")
 }
 
+tasks.create("jacocoRootReport") {
+    group = "automation"
+    description = "Execute test with coverage"
+
+    dependsOn("createJacocoTestReport")
+}
+
 tasks.withType<KotlinCompile> {
     group = "compilation"
     kotlinOptions.jvmTarget = "1.8"
