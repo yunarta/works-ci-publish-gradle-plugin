@@ -20,3 +20,11 @@ allprojects {
         mavenCentral()
     }
 }
+
+
+tasks.create("jacocoRootReport") {
+    group = "automation"
+    description = "Execute test with coverage"
+
+    dependsOn("createJacocoTestReport")
+}
