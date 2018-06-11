@@ -18,7 +18,6 @@ import org.gradle.internal.logging.text.StyledTextOutputFactory
 import org.gradle.jvm.tasks.Jar
 import java.util.*
 
-
 interface ProjectConfigurator {
 
     fun configureSource(project: Project, jar: Jar)
