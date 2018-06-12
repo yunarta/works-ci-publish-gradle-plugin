@@ -193,7 +193,7 @@ def compareArtifact(String repo, String job) {
     bintrayDownload([
             dir       : ".compare",
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'works-publish/module.properties'),
+            pkg       : readJSON(file: 'works-publish/module.json'),
             repo      : "mobilesolutionworks/${repo}",
             src       : "works-publish/build/libs"
     ])
@@ -201,7 +201,7 @@ def compareArtifact(String repo, String job) {
     def same = bintrayCompare([
             dir       : ".compare",
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'works-publish/module.properties'),
+            pkg       : readJSON(file: 'works-publish/module.json'),
             repo      : "mobilesolutionworks/${repo}",
             src       : "works-publish/build/libs"
     ])
