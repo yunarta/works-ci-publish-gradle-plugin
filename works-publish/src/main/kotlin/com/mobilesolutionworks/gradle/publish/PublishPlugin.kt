@@ -65,6 +65,12 @@ internal class PublishOptions {
     var configurator: ProjectConfigurator = JavaLibConfigurator()
 }
 
+val Project.workPublication: Publication
+    get() {
+        return project.extensions.findByName("publication") as Publication
+    }
+
+
 /**
  * Plugin implementation defined for this Gradle plugin.
  */
