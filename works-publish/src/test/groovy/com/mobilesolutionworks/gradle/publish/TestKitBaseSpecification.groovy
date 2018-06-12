@@ -49,7 +49,7 @@ abstract class TestKitBaseSpecification extends Specification {
                 .collect { "'$it'" }
                 .join(", ")
 
-        def agent = loader.getResource("gradle.properties").text + File.pathSeparatorChar + "${getClass().name}.exec"
+        def agent = loader.getResource("gradle.properties").text + File.separatorChar + "${getClass().name}.exec"
         agent = agent.replace('\\', '\\\\')
 
         gradleProperties.write("""${agent}
