@@ -260,7 +260,7 @@ project.afterEvaluate {
         rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
     }
 
-    tasks.create("worksCreatePublication") {
+    tasks.create("worksGeneratePublication") {
         group = "publishing"
         dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
     }
