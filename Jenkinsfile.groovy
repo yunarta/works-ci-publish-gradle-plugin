@@ -61,12 +61,6 @@ pipeline {
                 sh "./gradlew detektCheck -q"
                 sh "./gradlew clean testWithCoverage -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
             }
-
-            post {
-                always {
-                    androidEmulator command: "stop"
-                }
-            }
         }
 
         stage("Publish CAT") {
