@@ -225,7 +225,7 @@ def publish(String repo) {
     bintrayPublish([
             credential: "mobilesolutionworks.jfrog.org",
             pkg       : readJSON(file: 'works-publish/module.json'),
-            repo      : "mobilesolutionworks/release",
+            repo      : "mobilesolutionworks/${repo}",
             src       : "works-publish/build/libs"
     ])
 }
