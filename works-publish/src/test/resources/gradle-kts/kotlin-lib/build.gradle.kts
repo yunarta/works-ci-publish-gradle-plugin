@@ -1,4 +1,5 @@
-import com.mobilesolutionworks.gradle.publish.workPublication
+import com.mobilesolutionworks.gradle.publish.PublishedDoc
+import com.mobilesolutionworks.gradle.publish.worksPublication
 
 plugins {
     `java-library`
@@ -11,23 +12,7 @@ apply {
 group = "com.mobilesolutionworks"
 version = "1.0-SNAPSHOT"
 
-//val publication = extensions.findByName("publication")
-//println("publication = " + publication)
-//{
-    ////    javadoc =
-////    module = File("module.properties")
-//}
-
-//
-//version '1.0.0'
-//
-//publication {
-//    javadoc = "kotlin"
-//    includeTest = true
-//}
-//
-//sourceSets {
-//    main {
-//        java.srcDirs += ['src/main/kotlin']
-//    }
-//}
+worksPublication?.apply {
+    javadoc = PublishedDoc.Kotlin
+    module = File("module.properties")
+}

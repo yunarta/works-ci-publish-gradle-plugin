@@ -65,7 +65,7 @@ internal class PublishOptions {
     var configurator: ProjectConfigurator = JavaLibConfigurator()
 }
 
-val Project.workPublication: Publication?
+val Project.worksPublication: Publication?
     get() {
         return extensions.findByName("publication") as? Publication
     }
