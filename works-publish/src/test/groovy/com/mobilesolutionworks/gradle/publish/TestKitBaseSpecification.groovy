@@ -50,6 +50,8 @@ abstract class TestKitBaseSpecification extends Specification {
                 .join(", ")
 
         def agent = loader.getResource("gradle.properties").text + File.pathSeparatorChar + "${getClass().name}.exec"
+        agent = agent.replace('\\', '\\\\')
+
         gradleProperties.write("""${agent}
                                  |org.gradle.daemon=true""".stripMargin("|"))
 
