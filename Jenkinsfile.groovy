@@ -58,8 +58,8 @@ pipeline {
                 seedGrow("test")
 
                 echo "Build for test and analyze"
-                sh "./gradlew detektCheck -q"
                 sh "./gradlew clean testWithCoverage -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
+                sh "./gradlew detektCheck -q"
             }
         }
 
