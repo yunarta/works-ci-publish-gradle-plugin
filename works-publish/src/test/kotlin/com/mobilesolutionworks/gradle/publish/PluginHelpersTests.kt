@@ -1,4 +1,4 @@
-package com.mobilesolutionworks.gradle.publish;
+package com.mobilesolutionworks.gradle.publish
 
 import org.junit.Rule
 import org.junit.Test
