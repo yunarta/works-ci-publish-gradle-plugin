@@ -1,5 +1,6 @@
 package com.mobilesolutionworks.gradle.publish
 
+import kotlin.io.FileTreeWalk
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.AfterClass
@@ -13,9 +14,9 @@ import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 abstract class TestKitBaseSpecification extends Specification {
 
-    @ClassRule
+//    @ClassRule
     public
-    static TemporaryFolder testDir = new TemporaryFolder()
+    static TemporaryFolder testDir = new TemporaryFolder(new File("build/tmp"))
 
     private static File gradleProperties
     private static File buildGradle
@@ -26,11 +27,6 @@ abstract class TestKitBaseSpecification extends Specification {
 
         gradleProperties = testDir.newFile("gradle.properties")
         buildGradle = testDir.newFile("build.gradle")
-    }
-
-    @AfterClass
-    static def deleteTestDir() {
-        testDir.delete()
     }
 
     GradleRunner gradleRunner
