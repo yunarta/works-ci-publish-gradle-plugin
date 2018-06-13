@@ -184,11 +184,12 @@ tasks.create("setupJacocoAgent") {
     }
 
     doLast {
-        val jacocoPath = "$outputDir/jacocoagent.jar"
+        val jacocoPath = File(outputDir, "jacocoagent.jar").absolutePath
 
         val gradleProperties = file("$outputDir/gradle.properties")
         if (gradle.taskGraph.hasTask(":${project.name}:createJacocoTestReport")) {
-            gradleProperties.writeText("""org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=$buildDir/jacoco/""".trimMargin())
+            val jacocoOutputDir = File(buildDir, "jacoco").absolutePath
+            gradleProperties.writeText("""org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=$jacocoOutputDir""".trimMargin())
 
             logger.quiet("""Gradle properties for Tests
                    |${gradleProperties.readText()}
@@ -259,7 +260,7 @@ project.afterEvaluate {
         rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
     }
 
-    tasks.create("worksCreatePublication") {
+    tasks.create("worksGeneratePublication") {
         group = "publishing"
         dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
     }

@@ -65,6 +65,12 @@ internal class PublishOptions {
     var configurator: ProjectConfigurator = JavaLibConfigurator()
 }
 
+val Project.worksPublication: Publication?
+    get() {
+        return extensions.findByName("publication") as? Publication
+    }
+
+
 /**
  * Plugin implementation defined for this Gradle plugin.
  */
@@ -127,63 +133,65 @@ class PublishPlugin : Plugin<Project> {
     internal fun createPOM(project: Project, extensions: ExtensionContainer) {
         val it = extensions.findByName("publishing")
         if (it != null && it is PublishingExtension) {
-            it.publications.create("workPublish", MavenPublication::class.java) { maven ->
-                maven.artifactId = project.name
-                maven.version = project.version.toString()
+            it.publications {
+                it.create("workPublish", MavenPublication::class.java) { maven ->
+                    maven.artifactId = project.name
+                    maven.version = project.version.toString()
 
-                if (opts.isAndroidLibrary) {
-                    maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.aar")
-                } else {
-                    maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
-                }
-
-                maven.pom.withXml {
-                    val root = it.asNode()
-
-                    val license = root.appendNode("licenses").appendNode("license")
-                    license.appendNode("name", "The Apache Software License, Version 2.0")
-                    license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    license.appendNode("distribution", "repo")
-
-                    val dependenciesNode = root.appendNode("dependencies")
-                    val dependencies = mutableMapOf<String, DependencyData>()
-
-                    val transforms = mutableListOf(
-                            DependencyTransform.TestImplementation,
-                            DependencyTransform.Implementation,
-                            DependencyTransform.Api,
-                            DependencyTransform.CompileOnly
-                    )
-                    if (!publication.includeTest) {
-                        transforms.removeAt(0)
+                    if (opts.isAndroidLibrary) {
+                        maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.aar")
+                    } else {
+                        maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
                     }
-                    transforms.forEach { transform ->
-                        project.configurations.getAt(transform.configuration).allDependencies.forEach {
-                            val key = "${it.group.toString()}:${it.name}:${it.version}"
-                            dependencies[key] = DependencyData(
-                                    it.group,
-                                    it.name,
-                                    it.version,
-                                    transform.scope
-                            )
+
+                    maven.pom.withXml {
+                        val root = it.asNode()
+
+                        val license = root.appendNode("licenses").appendNode("license")
+                        license.appendNode("name", "The Apache Software License, Version 2.0")
+                        license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        license.appendNode("distribution", "repo")
+
+                        val dependenciesNode = root.appendNode("dependencies")
+                        val dependencies = mutableMapOf<String, DependencyData>()
+
+                        val transforms = mutableListOf(
+                                DependencyTransform.TestImplementation,
+                                DependencyTransform.Implementation,
+                                DependencyTransform.Api,
+                                DependencyTransform.CompileOnly
+                        )
+                        if (!publication.includeTest) {
+                            transforms.removeAt(0)
                         }
-                    }
+                        transforms.forEach { transform ->
+                            project.configurations.getAt(transform.configuration).allDependencies.forEach {
+                                val key = "${it.group.toString()}:${it.name}:${it.version}"
+                                dependencies[key] = DependencyData(
+                                        it.group,
+                                        it.name,
+                                        it.version,
+                                        transform.scope
+                                )
+                            }
+                        }
 
-                    project.logger.quiet("""Project Object Model
+                        project.logger.quiet("""Project Object Model
                                    |====================
                                    |${project.group}:${maven.artifactId}:${project.version}
                                    |Deps""".trimMargin("|"))
-                    dependencies.values.forEach {
-                        project.logger.quiet("""  ${it.scope}: ${it.group}:${it.artifact}:${it.version}""")
+                        dependencies.values.forEach {
+                            project.logger.quiet("""  ${it.scope}: ${it.group}:${it.artifact}:${it.version}""")
 
-                        val dependencyNode = dependenciesNode.appendNode("dependency")
-                        dependencyNode.appendNode("groupId", it.group)
-                        dependencyNode.appendNode("artifactId", it.artifact)
-                        dependencyNode.appendNode("version", it.version)
-                        dependencyNode.appendNode("scope", it.scope)
+                            val dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", it.group)
+                            dependencyNode.appendNode("artifactId", it.artifact)
+                            dependencyNode.appendNode("version", it.version)
+                            dependencyNode.appendNode("scope", it.scope)
+                        }
+
+                        project.logger.quiet("")
                     }
-
-                    project.logger.quiet("")
                 }
             }
         }

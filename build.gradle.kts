@@ -20,3 +20,14 @@ allprojects {
         mavenCentral()
     }
 }
+
+tasks.create("jacocoRootReport") {
+    group = "automation"
+    description = "Execute test with coverage"
+
+    dependsOn(":works-publish:createJacocoTestReport")
+}
+
+tasks.create("clean", Delete::class.java) {
+    delete(rootProject.buildDir)
+}
