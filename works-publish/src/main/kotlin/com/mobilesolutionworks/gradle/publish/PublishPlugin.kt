@@ -165,14 +165,16 @@ class PublishPlugin : Plugin<Project> {
                             transforms.removeAt(0)
                         }
                         transforms.forEach { transform ->
-                            project.configurations.getAt(transform.configuration).allDependencies.forEach {
-                                val key = "${it.group.toString()}:${it.name}:${it.version}"
-                                dependencies[key] = DependencyData(
-                                        it.group,
-                                        it.name,
-                                        it.version,
-                                        transform.scope
-                                )
+                            project.configurations.findByName(transform.configuration)?.apply {
+                                allDependencies.forEach {
+                                    val key = "${it.group.toString()}:${it.name}:${it.version}"
+                                    dependencies[key] = DependencyData(
+                                            it.group,
+                                            it.name,
+                                            it.version,
+                                            transform.scope
+                                    )
+                                }
                             }
                         }
 
