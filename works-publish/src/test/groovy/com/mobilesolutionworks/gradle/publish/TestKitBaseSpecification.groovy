@@ -10,19 +10,22 @@ import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import java.nio.file.Paths
+
 import static org.gradle.testkit.runner.TaskOutcome.SUCCESS
 
 abstract class TestKitBaseSpecification extends Specification {
 
-//    @ClassRule
-    public
-    static TemporaryFolder testDir = new TemporaryFolder(new File("build/tmp"))
+    private static tempDir = Paths.get("build", "tmp", "runTest").toFile()
+
+    public static TemporaryFolder testDir = new TemporaryFolder(tempDir)
 
     private static File gradleProperties
     private static File buildGradle
 
     @BeforeClass
     static def setupFolder() {
+        tempDir.mkdirs()
         testDir.create()
 
         gradleProperties = testDir.newFile("gradle.properties")

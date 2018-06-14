@@ -1,6 +1,7 @@
 import groovy.json.JsonSlurper
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.*
 
 plugins {
     `java-library`
@@ -88,6 +89,13 @@ dependencies {
     compileOnly("com.android.tools.build:gradle-core:3.1.2") {
         isTransitive = false
     }
+}
+
+task("cleanTest", Delete::class) {
+    delete(
+            tasks.getByName("test").outputs.files,
+            Paths.get("build", "tmp", "runTest").toFile()
+    )
 }
 
 tasks.create("createClasspathManifest") {
