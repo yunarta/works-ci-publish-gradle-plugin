@@ -1,0 +1,11 @@
+plugins {
+    id "java"
+}
+
+apply plugin: 'works-publish'
+
+group 'com.mobilesolutionworks'
+version '1.0.0'
+
+dependencies {
+}
