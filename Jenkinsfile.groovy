@@ -58,8 +58,8 @@ pipeline {
                 seedGrow("test")
 
                 echo "Build for test and analyze"
-                sh "./gradlew clean testWithCoverage -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
-                sh "./gradlew detektCheck -q"
+                sh "./gradlew clean automationTest -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
+                sh "./gradlew automationCheck -q"
             }
         }
 
@@ -75,7 +75,7 @@ pipeline {
 
                 junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
                 jacoco execPattern: 'works-publish/build/jacoco/*.exec', classPattern: 'works-publish/build/classes/**/main', sourcePattern: 'works-publish/src/main/kotlin,works-publish/src/main/java'
-                checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/detekt-report.xml', unHealthy: ''
+                checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'plugin/build/reports/detekt/detekt-report.xml', unHealthy: ''
                 codeCoverage()
             }
         }
@@ -232,6 +232,6 @@ def publish(String repo) {
 
 def codeCoverage() {
     withCredentials([[$class: 'StringBinding', credentialsId: "codecov-token", variable: "CODECOV_TOKEN"]]) {
-        sh "curl -s https://codecov.io/bash | bash -s - -f works-publish/build/reports/createJacocoTestReport/createJacocoTestReport.xml"
+        sh "curl -s https://codecov.io/bash | bash -s - -f works-publish/build/reports/jacocoCoverageTest/jacocoCoverageTest.xml"
     }
 }
