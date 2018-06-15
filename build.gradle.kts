@@ -1,15 +1,19 @@
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.2.41"
+    kotlinVersion = "1.2.50"
 
     repositories {
         jcenter()
         google()
         mavenCentral()
+        maven {
+            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
+        }
     }
 
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
+        classpath("com.github.ben-manes:gradle-versions-plugin:0.19.0")
     }
 }
 
@@ -18,6 +22,12 @@ allprojects {
         jcenter()
         google()
         mavenCentral()
+    }
+}
+
+subprojects {
+    apply {
+        plugin("com.github.ben-manes.versions")
     }
 }
 
