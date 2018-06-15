@@ -16,3 +16,7 @@ worksPublication?.apply {
     javadoc = PublishedDoc.Kotlin
     module = File("module.properties")
 }
+
+dependencies {
+    compileOnly(gradleApi())
+}
