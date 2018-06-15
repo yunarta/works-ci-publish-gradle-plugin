@@ -49,9 +49,24 @@ publication {
     includeTest = true|false
     module = file('module.properties')
 }
-
 ```
 
+module **build.gradle.kts**
+```kotlin
+apply {
+    plugin("works-publish")
+}
+
+group = "com.mobilesolutionworks"
+version = "1.0.0"
+            
+worksPublication?.apply {
+    javadoc = PublishedDoc.Java|PublishedDoc.Kotlin
+    includeTest = true|false
+    // take note that using File() will point the module to project root instead   
+    module = file("module.properties")
+}
+```
 Parameter
 - javadoc: Define how the publish plugin should generated the JavaDoc.
 - includeTest: When set to true, test configuration dependencies will be included in output.
