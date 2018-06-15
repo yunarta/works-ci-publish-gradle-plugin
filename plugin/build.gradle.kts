@@ -9,7 +9,6 @@ plugins {
     jacoco
     maven
 
-    id("com.adarshr.test-logger") version "1.2.0"
     id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
     id("org.jetbrains.dokka") version "0.9.17"
 }
@@ -210,12 +209,7 @@ tasks.withType<Test> {
 
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
     ignoreFailures = shouldIgnoreFailures
-
-    testLogging {
-        showStandardStreams = true
-        events("passed", "skipped", "failed", "standardOut", "standardError")
-    }
-
+    
     doFirst {
         logger.quiet("Test with max $maxParallelForks parallel forks")
     }
