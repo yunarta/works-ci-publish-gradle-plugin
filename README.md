@@ -19,15 +19,26 @@ Usage:
 - Make sure group and version is there as for POM requirement
 - As for now a Java-Kotlin project must choose which Javadoc they wanted to use  
 
-## Configure
+## Installation
 
 ```groovy
 buildscript {
-    dependencies {
-        classpath 'com.mobilesolutionworks:works-publish:1.0.1'
+    repositories {
+        maven {
+            url = "https://dl.bintray.com/mobilesolutionworks/release"
+        }
     }
+    
+    dependencies {
+        classpath("com.mobilesolutionworks:works-publish:1.0.5")
+    }    
 }
+```
 
+## Configure
+
+module **build.gradle**
+```groovy
 apply plugin: 'works-publish'
 
 group 'com.mobilesolutionworks'

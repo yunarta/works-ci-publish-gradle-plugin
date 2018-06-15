@@ -25,7 +25,7 @@ tasks.create("jacocoRootReport") {
     group = "automation"
     description = "Execute test with coverage"
 
-    dependsOn(":works-publish:createJacocoTestReport")
+    dependsOn(":works-publish:jacocoCoverageTest")
 }
 
 tasks.create("clean", Delete::class.java) {

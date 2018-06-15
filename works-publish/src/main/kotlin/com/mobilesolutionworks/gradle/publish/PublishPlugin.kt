@@ -98,7 +98,7 @@ class PublishPlugin : Plugin<Project> {
 
                 publication.module?.let {
                     if (!it.exists()) {
-                        logWarn("module is provided, file is not found")
+                        logWarn("module is provided, file (${it.absolutePath}) is not found")
                     } else {
                         val module = Properties()
                         module.load(it.reader())
@@ -144,7 +144,7 @@ class PublishPlugin : Plugin<Project> {
                         maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
                     }
 
-                    maven.pom.withXml {
+                    maven.pom.withXml { it ->
                         val root = it.asNode()
 
                         val license = root.appendNode("licenses").appendNode("license")
@@ -153,43 +153,46 @@ class PublishPlugin : Plugin<Project> {
                         license.appendNode("distribution", "repo")
 
                         val dependenciesNode = root.appendNode("dependencies")
-                        val dependencies = mutableMapOf<String, DependencyData>()
-
-                        val transforms = mutableListOf(
-                                DependencyTransform.TestImplementation,
-                                DependencyTransform.Implementation,
-                                DependencyTransform.Api,
-                                DependencyTransform.CompileOnly
-                        )
-                        if (!publication.includeTest) {
-                            transforms.removeAt(0)
-                        }
-                        transforms.forEach { transform ->
-                            project.configurations.findByName(transform.configuration)?.apply {
-                                allDependencies.forEach {
-                                    val key = "${it.group.toString()}:${it.name}:${it.version}"
-                                    dependencies[key] = DependencyData(
-                                            it.group,
-                                            it.name,
-                                            it.version,
-                                            transform.scope
-                                    )
-                                }
-                            }
-                        }
-
                         project.logger.quiet("""Project Object Model
                                    |====================
                                    |${project.group}:${maven.artifactId}:${project.version}
                                    |Deps""".trimMargin("|"))
-                        dependencies.values.forEach {
-                            project.logger.quiet("""  ${it.scope}: ${it.group}:${it.artifact}:${it.version}""")
+
+                        mutableListOf(
+                                DependencyTransform.TestImplementation,
+                                DependencyTransform.Implementation,
+                                DependencyTransform.Api,
+                                DependencyTransform.CompileOnly
+                        ).apply {
+                            if (!publication.includeTest) {
+                                removeAt(0)
+                            }
+                        }.flatMap { transform ->
+                            project.configurations.findByName(transform.configuration)?.let {
+                                it.allDependencies.mapNotNull {
+                                    it.takeIf { it.group != null }?.let {
+                                        // dependencies[key] =
+                                        DependencyData(
+                                                it.group,
+                                                it.name,
+                                                it.version,
+                                                transform.scope
+                                        )
+                                    }
+                                }
+                            } ?: emptyList()
+                        }.associateBy {
+                            "${it.group}:${it.artifact}:${it.version}"
+                        }.forEach {
+                            val value = it.value
+                            project.logger
+                                    .quiet("""  ${value.scope}: ${value.group}:${value.artifact}:${value.version}""")
 
                             val dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", it.group)
-                            dependencyNode.appendNode("artifactId", it.artifact)
-                            dependencyNode.appendNode("version", it.version)
-                            dependencyNode.appendNode("scope", it.scope)
+                            dependencyNode.appendNode("groupId", value.group)
+                            dependencyNode.appendNode("artifactId", value.artifact)
+                            dependencyNode.appendNode("version", value.version)
+                            dependencyNode.appendNode("scope", value.scope)
                         }
 
                         project.logger.quiet("")

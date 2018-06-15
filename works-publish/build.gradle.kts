@@ -45,7 +45,7 @@ detekt {
         input = "src/main/kotlin"
         filters = ".*/resources/.*,.*/build/.*"
         config = file("default-detekt-config.yml")
-        output = "reports"
+        output = "$buildDir/reports/detekt"
         outputName = "detekt-report"
         baseline = "reports/baseline.xml"
     })
@@ -117,7 +117,7 @@ tasks.create("createClasspathManifest") {
     outputs.dir(outputDir)
 }
 
-tasks.create("createJacocoTestReport", JacocoReport::class.java) {
+tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
     group = "Reporting"
     description = "Generate Jacoco coverage reports for Debug build"
 
@@ -153,11 +153,18 @@ tasks.create("createJacocoTestReport", JacocoReport::class.java) {
     executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
 }
 
-tasks.create("testWithCoverage") {
+tasks.create("automationTest") {
     group = "automation"
     description = "Execute test with coverage"
 
-    dependsOn("createJacocoTestReport")
+    dependsOn("cleanTest", "jacocoCoverageTest")
+}
+
+tasks.create("automationCheck") {
+    group = "automation"
+    description = "Execute check"
+
+    dependsOn("detektCheck")
 }
 
 tasks.withType<KotlinCompile> {
@@ -195,7 +202,7 @@ tasks.create("setupJacocoAgent") {
         val jacocoPath = File(outputDir, "jacocoagent.jar").absolutePath
 
         val gradleProperties = file("$outputDir/gradle.properties")
-        if (gradle.taskGraph.hasTask(":${project.name}:createJacocoTestReport")) {
+        if (gradle.taskGraph.hasTask(":${project.name}:jacocoCoverageTest")) {
             val jacocoOutputDir = File(buildDir, "jacoco").absolutePath
             gradleProperties.writeText("""org.gradle.jvmargs=-javaagent:${jacocoPath}=destfile=$jacocoOutputDir""".trimMargin())
 
@@ -215,6 +222,10 @@ tasks.withType<Test> {
     testLogging {
         showStandardStreams = true
         events("passed", "skipped", "failed", "standardOut", "standardError")
+    }
+
+    doFirst {
+        logger.quiet("Test with max $maxParallelForks parallel forks")
     }
 }
 
