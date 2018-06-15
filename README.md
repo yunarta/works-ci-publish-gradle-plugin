@@ -30,7 +30,7 @@ buildscript {
     }
     
     dependencies {
-        classpath("com.mobilesolutionworks:works-publish:1.0.4")
+        classpath("com.mobilesolutionworks:works-publish:1.0.5")
     }    
 }
 ```
