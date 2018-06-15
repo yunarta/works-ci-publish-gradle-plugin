@@ -74,7 +74,7 @@ pipeline {
                 echo "Publishing test and analyze result"
 
                 junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
-                jacoco execPattern: 'works-publish/build/jacoco/*.exec', classPattern: 'works-publish/build/classes/**/main', sourcePattern: 'works-publish/src/main/kotlin,works-publish/src/main/java'
+                jacoco execPattern: 'plugin/build/jacoco/*.exec', classPattern: 'plugin/build/classes/**/main', sourcePattern: 'plugin/src/main/kotlin,plugin/src/main/java'
                 checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'plugin/build/reports/detekt/detekt-report.xml', unHealthy: ''
                 codeCoverage()
             }
@@ -193,17 +193,17 @@ def compareArtifact(String repo, String job) {
     bintrayDownload([
             dir       : ".compare",
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'works-publish/module.json'),
+            pkg       : readJSON(file: 'plugin/module.json'),
             repo      : "mobilesolutionworks/${repo}",
-            src       : "works-publish/build/libs"
+            src       : "plugin/build/libs"
     ])
 
     def same = bintrayCompare([
             dir       : ".compare",
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'works-publish/module.json'),
+            pkg       : readJSON(file: 'plugin/module.json'),
             repo      : "mobilesolutionworks/${repo}",
-            src       : "works-publish/build/libs"
+            src       : "plugin/build/libs"
     ])
 
     if (fileExists(".notify")) {
@@ -224,14 +224,14 @@ def doPublish() {
 def publish(String repo) {
     bintrayPublish([
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'works-publish/module.json'),
+            pkg       : readJSON(file: 'plugin/module.json'),
             repo      : "mobilesolutionworks/${repo}",
-            src       : "works-publish/build/libs"
+            src       : "plugin/build/libs"
     ])
 }
 
 def codeCoverage() {
     withCredentials([[$class: 'StringBinding', credentialsId: "codecov-token", variable: "CODECOV_TOKEN"]]) {
-        sh "curl -s https://codecov.io/bash | bash -s - -f works-publish/build/reports/jacocoCoverageTest/jacocoCoverageTest.xml"
+        sh "curl -s https://codecov.io/bash | bash -s - -f plugin/build/reports/jacocoCoverageTest/jacocoCoverageTest.xml"
     }
 }
