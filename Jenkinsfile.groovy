@@ -12,6 +12,10 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    environment {
+        JFROGCLI = "${tool 'JfrogCLI'}"
+    }
+
     stages {
         stage('Select') {
             parallel {
@@ -43,49 +47,49 @@ pipeline {
             }
         }
 
-        stage("Coverage, Analyze and Test") {
-            when {
-                expression {
-                    notIntegration() && notRelease()
-                }
-            }
+//        stage("Coverage, Analyze and Test") {
+//            when {
+//                expression {
+//                    notIntegration() && notRelease()
+//                }
+//            }
+//
+//            options {
+//                retry(2)
+//            }
+//
+//            steps {
+//                seedGrow("test")
+//
+//                echo "Build for test and analyze"
+//                sh "./gradlew clean automationTest -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
+//                sh "./gradlew automationCheck -q"
+//            }
+//        }
 
-            options {
-                retry(2)
-            }
-
-            steps {
-                seedGrow("test")
-
-                echo "Build for test and analyze"
-                sh "./gradlew clean automationTest -PignoreFailures=${seedEval("test", [1: "true", "else": "false"])} -q"
-                sh "./gradlew automationCheck -q"
-            }
-        }
-
-        stage("Publish CAT") {
-            when {
-                expression {
-                    notIntegration() && notRelease()
-                }
-            }
-
-            steps {
-                echo "Publishing test and analyze result"
-
-                junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
-                jacoco execPattern: 'plugin/build/jacoco/*.exec', classPattern: 'plugin/build/classes/**/main', sourcePattern: 'plugin/src/main/kotlin,plugin/src/main/java'
-                checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'plugin/build/reports/detekt/detekt-report.xml', unHealthy: ''
-                codeCoverage()
-            }
-        }
+//        stage("Publish CAT") {
+//            when {
+//                expression {
+//                    notIntegration() && notRelease()
+//                }
+//            }
+//
+//            steps {
+//                echo "Publishing test and analyze result"
+//
+//                junit allowEmptyResults: true, testResults: '**/test-results/**/*.xml'
+//                jacoco execPattern: 'plugin/build/jacoco/*.exec', classPattern: 'plugin/build/classes/**/main', sourcePattern: 'plugin/src/main/kotlin,plugin/src/main/java'
+//                checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: 'plugin/build/reports/detekt/detekt-report.xml', unHealthy: ''
+//                codeCoverage()
+//            }
+//        }
 
         stage("Build") {
-            when {
-                expression {
-                    notIntegration() && notFeatureBranch()
-                }
-            }
+//            when {
+//                expression {
+//                    notIntegration() && notFeatureBranch()
+//                }
+//            }
 
             parallel {
                 stage("Snapshot") {
@@ -96,6 +100,7 @@ pipeline {
                     }
 
                     steps {
+                        updateVersion()
                         sh './gradlew clean worksGeneratePublication'
                     }
                 }
@@ -115,11 +120,11 @@ pipeline {
         }
 
         stage("Compare") {
-            when {
-                expression {
-                    notIntegration() && notFeatureBranch()
-                }
-            }
+//            when {
+//                expression {
+//                    notIntegration() && notFeatureBranch()
+//                }
+//            }
 
 
             parallel {
@@ -187,6 +192,13 @@ pipeline {
             }
         }
     }
+}
+
+def updateVersion() {
+    def properties = readJSON(file: 'plugin/module.json')
+    properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
+    sh "rm plugin/module.json"
+    writeJSON file: 'plugin/module.json', json: properties
 }
 
 def compareArtifact(String repo, String job) {
