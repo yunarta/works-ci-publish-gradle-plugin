@@ -195,8 +195,18 @@ pipeline {
 }
 
 def updateVersion() {
+    bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
+            credential: "mobilesolutionworks.jfrog.org"
+
     def properties = readYaml(file: 'plugin/module.yaml')
-    properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
+    def incremented = versionIncrementQualifier()
+    if (incremented != null) {
+        properties.version = incremented
+    } else {
+        properties.version = properties.version + "-BUILD-1"
+    }
+
     sh "rm plugin/module.yaml"
     writeYaml file: 'plugin/module.yaml', data: properties
 }
