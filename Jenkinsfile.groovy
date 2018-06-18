@@ -195,19 +195,19 @@ pipeline {
 }
 
 def updateVersion() {
-    def properties = readYaml(file: 'plugin/module.properties')
+    def properties = readYaml(file: 'plugin/module.yaml')
     properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
-    sh "rm plugin/module.properties"
-    writeYaml file: 'plugin/module.properties', data: properties
+    sh "rm plugin/module.yaml"
+    writeYaml file: 'plugin/module.yaml', data: properties
 }
 
 def compareArtifact(String repo, String job) {
-    bintrayDownload2 repository: "mobilesolutionworks/${repo}",
-            packageInfo: readYaml(file: 'plugin/module.properties'),
+    bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
             credential: "mobilesolutionworks.jfrog.org"
 
-    def same = bintrayCompare2 repository: "mobilesolutionworks/${repo}",
-            packageInfo: readYaml(file: 'plugin/module.properties'),
+    def same = bintrayCompare repository: "mobilesolutionworks/${repo}",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
             credential: "mobilesolutionworks.jfrog.org",
             path: "plugin/build/libs"
 
@@ -229,7 +229,7 @@ def doPublish() {
 def publish(String repo) {
     bintrayPublish([
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readYaml(file: 'plugin/module.properties'),
+            pkg       : readYaml(file: 'plugin/module.yaml'),
             repo      : "mobilesolutionworks/${repo}",
             src       : "plugin/build/libs"
     ])

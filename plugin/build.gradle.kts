@@ -22,7 +22,7 @@ apply {
 
 worksPublication?.apply {
     javadoc = PublishedDoc.Kotlin
-    module = file("module.properties")
+    module = file("module.yaml")
 }
 
 val kotlinVersion: String by rootProject.extra
