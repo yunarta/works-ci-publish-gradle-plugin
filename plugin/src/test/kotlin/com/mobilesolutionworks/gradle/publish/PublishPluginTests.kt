@@ -16,7 +16,6 @@ class PublishPluginTests {
         val extensions = Mockito.mock(ExtensionContainer::class.java)
         whenever(project.extensions).thenReturn(extensions)
 
-        val any = project.worksPublication
         assertNull(project.worksPublication)
 
         val publication = Publication()

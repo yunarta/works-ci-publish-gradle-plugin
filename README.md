@@ -49,10 +49,13 @@ publication {
     includeTest = true|false
     module = file('module.properties')
 }
+
 ```
 
 module **build.gradle.kts**
 ```kotlin
+import com.mobilesolutionworks.gradle.publish.worksPublication
+
 apply {
     plugin("works-publish")
 }
