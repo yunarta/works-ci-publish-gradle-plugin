@@ -211,19 +211,19 @@ def compareArtifact(String repo, String job) {
             credential: "mobilesolutionworks.jfrog.org",
             path: "plugin/build/libs"
 
-    if (fileExists(".notify")) {
-        sh "rm .notify"
+    if (fileExists(".jenkins/notify")) {
+        sh "rm .jenkins/notify"
     }
 
     if (same) {
         echo "Artifact output is identical, no integration needed"
     } else {
-        writeFile file: ".notify", text: job
+        writeFile file: ".jenkins/notify", text: job
     }
 }
 
 def doPublish() {
-    return fileExists(".notify")
+    return fileExists(".jenkins/notify")
 }
 
 def publish(String repo) {
