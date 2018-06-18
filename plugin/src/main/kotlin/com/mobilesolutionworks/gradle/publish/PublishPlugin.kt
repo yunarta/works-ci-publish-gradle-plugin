@@ -330,26 +330,27 @@ class PublishPlugin : Plugin<Project> {
 
     private fun generatePublicationTask(project: Project) {
         with(project) {
-            tasks.create("worksCleanLib") {
+            tasks.create("worksCleanLib", Copy::class.java) {
                 val file = moduleFile
                 if (file != null) {
                     it.inputs.file(file)
                     it.doFirst {
                         File(project.buildDir, "libs").deleteRecursively()
                     }
+                    it.from(moduleFile)
+                    it.into("$buildDir/tmp/cleanLib")
                 }
             }
 
             tasks.create("worksCalculateChecksum") {
                 it.dependsOn(
-                        "worksCleanLib",
                         "worksGenerateAssembly",
                         "worksArchiveSources",
                         "worksArchiveDocumentation",
                         "worksGeneratePom",
                         "worksGenerateCleanPom"
                 )
-
+                it.mustRunAfter("worksCleanLib")
                 it.doLast {
                     val root = file("${project.buildDir}/checksum/binary")
                     val binary = if (opts.isAndroidLibrary) {
@@ -374,7 +375,7 @@ class PublishPlugin : Plugin<Project> {
             }
 
             tasks.create("worksGeneratePublication") {
-                it.dependsOn("worksCalculateChecksum")
+                it.dependsOn("worksCleanLib", "worksCalculateChecksum")
                 it.group = "publishing"
             }
         }
