@@ -195,28 +195,21 @@ pipeline {
 }
 
 def updateVersion() {
-    def properties = readJSON(file: 'plugin/module.json')
+    def properties = writeYaml(file: 'plugin/module.properties')
     properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
-    sh "rm plugin/module.json"
-    writeJSON file: 'plugin/module.json', json: properties
+    sh "rm plugin/module.properties"
+    writeYaml file: 'plugin/module.properties', data: properties
 }
 
 def compareArtifact(String repo, String job) {
-    bintrayDownload([
-            dir       : ".compare",
-            credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'plugin/module.json'),
-            repo      : "mobilesolutionworks/${repo}",
-            src       : "plugin/build/libs"
-    ])
+    bintrayDownload2 repository: "mobilesolutionworks/${repo}",
+            packageInfo: writeYaml(file: 'plugin/module.properties'),
+            credential: "mobilesolutionworks.jfrog.org"
 
-    def same = bintrayCompare([
-            dir       : ".compare",
+    def same = bintrayCompare2 repository: "mobilesolutionworks/${repo}",
+            packageInfo: writeYaml(file: 'plugin/module.properties'),
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'plugin/module.json'),
-            repo      : "mobilesolutionworks/${repo}",
-            src       : "plugin/build/libs"
-    ])
+            path: "plugin/build/libs"
 
     if (fileExists(".notify")) {
         sh "rm .notify"
@@ -236,7 +229,7 @@ def doPublish() {
 def publish(String repo) {
     bintrayPublish([
             credential: "mobilesolutionworks.jfrog.org",
-            pkg       : readJSON(file: 'plugin/module.json'),
+            pkg       : readYaml(file: 'plugin/module.properties'),
             repo      : "mobilesolutionworks/${repo}",
             src       : "plugin/build/libs"
     ])

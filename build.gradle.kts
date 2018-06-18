@@ -14,6 +14,7 @@ buildscript {
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.github.ben-manes:gradle-versions-plugin:0.19.0")
+        classpath("com.mobilesolutionworks:works-publish:1.0.5")
     }
 }
 
