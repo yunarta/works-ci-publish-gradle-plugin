@@ -1,3 +1,5 @@
+import com.mobilesolutionworks.gradle.publish.PublishedDoc
+import com.mobilesolutionworks.gradle.publish.worksPublication
 import groovy.json.JsonSlurper
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -13,15 +15,14 @@ plugins {
     id("org.jetbrains.dokka") version "0.9.17"
 }
 
-val config = groovy.json.JsonSlurper().parse(file("module.json")) as? Map<String, String>
-config?.apply {
-    group = getOrDefault("group", "com.mobilesolutionworks")
-    version = getOrDefault("version", "1.0.0")
-}
-
 apply {
     plugin("kotlin")
-    plugin("maven-publish")
+    plugin("works-publish")
+}
+
+worksPublication?.apply {
+    javadoc = PublishedDoc.Kotlin
+    module = file("module.properties")
 }
 
 val kotlinVersion: String by rootProject.extra
@@ -209,64 +210,64 @@ tasks.withType<Test> {
 
     maxParallelForks = Runtime.getRuntime().availableProcessors().div(2)
     ignoreFailures = shouldIgnoreFailures
-    
+
     doFirst {
         logger.quiet("Test with max $maxParallelForks parallel forks")
     }
 }
 
-tasks.create("worksArchiveDocumentation", Jar::class.java) {
-    dependsOn("dokka")
-
-    classifier = "javadoc"
-    from((tasks.findByPath("dokka") as DokkaTask).outputDirectory)
-}
-
-tasks.create("worksArchiveSources", Jar::class.java) {
-    classifier = "sources"
-    from(sourceSets["main"].java.srcDirs)
-}
-
-project.afterEvaluate {
-    extensions.findByType(PublishingExtension::class.java)?.let {
-        it.publications {
-            create("projectRelease", MavenPublication::class.java) {
-                artifactId = project.name
-                version = project.version.toString()
-
-                artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
-
-                pom.withXml {
-                    val root = asNode()
-
-                    val license = root.appendNode("licenses").appendNode("license")
-                    license.appendNode("name", "The Apache Software License, Version 2.0")
-                    license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    license.appendNode("distribution", "repo")
-
-                    val dependenciesNode = root.appendNode("dependencies")
-                    project.configurations.getAt("implementation").dependencies.forEach {
-                        val dependencyNode = dependenciesNode.appendNode("dependency")
-                        dependencyNode.appendNode("groupId", it.group)
-                        dependencyNode.appendNode("artifactId", it.name)
-                        dependencyNode.appendNode("version", it.version)
-                        dependencyNode.appendNode("scope", "runtime")
-                    }
-                }
-            }
-        }
-    }
-
-    tasks.create("worksGeneratePom", Copy::class.java) {
-
-        dependsOn("generatePomFileForProjectReleasePublication")
-        from("$buildDir/publications/projectRelease")
-        into("$buildDir/libs/")
-        rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
-    }
-
-    tasks.create("worksGeneratePublication") {
-        group = "publishing"
-        dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
-    }
-}
+//tasks.create("worksArchiveDocumentation", Jar::class.java) {
+//    dependsOn("dokka")
+//
+//    classifier = "javadoc"
+//    from((tasks.findByPath("dokka") as DokkaTask).outputDirectory)
+//}
+//
+//tasks.create("worksArchiveSources", Jar::class.java) {
+//    classifier = "sources"
+//    from(sourceSets["main"].java.srcDirs)
+//}
+//
+//project.afterEvaluate {
+//    extensions.findByType(PublishingExtension::class.java)?.let {
+//        it.publications {
+//            create("projectRelease", MavenPublication::class.java) {
+//                artifactId = project.name
+//                version = project.version.toString()
+//
+//                artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
+//
+//                pom.withXml {
+//                    val root = asNode()
+//
+//                    val license = root.appendNode("licenses").appendNode("license")
+//                    license.appendNode("name", "The Apache Software License, Version 2.0")
+//                    license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+//                    license.appendNode("distribution", "repo")
+//
+//                    val dependenciesNode = root.appendNode("dependencies")
+//                    project.configurations.getAt("implementation").dependencies.forEach {
+//                        val dependencyNode = dependenciesNode.appendNode("dependency")
+//                        dependencyNode.appendNode("groupId", it.group)
+//                        dependencyNode.appendNode("artifactId", it.name)
+//                        dependencyNode.appendNode("version", it.version)
+//                        dependencyNode.appendNode("scope", "runtime")
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    tasks.create("worksGeneratePom", Copy::class.java) {
+//
+//        dependsOn("generatePomFileForProjectReleasePublication")
+//        from("$buildDir/publications/projectRelease")
+//        into("$buildDir/libs/")
+//        rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
+//    }
+//
+//    tasks.create("worksGeneratePublication") {
+//        group = "publishing"
+//        dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
+//    }
+//}

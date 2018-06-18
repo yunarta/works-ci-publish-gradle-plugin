@@ -16,6 +16,8 @@ import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.internal.logging.text.StyledTextOutput
 import org.gradle.internal.logging.text.StyledTextOutputFactory
 import org.gradle.jvm.tasks.Jar
+import org.gradle.util.VersionNumber
+import java.io.File
 import java.util.*
 
 interface ProjectConfigurator {
@@ -82,6 +84,8 @@ class PublishPlugin : Plugin<Project> {
 
     private lateinit var publication: Publication
 
+    private var moduleFile: File? = null
+
     /**
      * Apply the plugin to specified project.
      *
@@ -100,6 +104,8 @@ class PublishPlugin : Plugin<Project> {
                     if (!it.exists()) {
                         logWarn("module is provided, file (${it.absolutePath}) is not found")
                     } else {
+                        moduleFile = it
+
                         val module = Properties()
                         module.load(it.reader())
 
@@ -138,67 +144,87 @@ class PublishPlugin : Plugin<Project> {
                     maven.artifactId = project.name
                     maven.version = project.version.toString()
 
-                    if (opts.isAndroidLibrary) {
-                        maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.aar")
-                    } else {
-                        maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
-                    }
+                    writePom(maven, project)
+                }
 
-                    maven.pom.withXml { it ->
-                        val root = it.asNode()
+                it.create("workCleanPublish", MavenPublication::class.java) { maven ->
+                    maven.artifactId = project.name
+                    val version = VersionNumber.parse(project.version.toString())
+                    val clean = VersionNumber(
+                            version.major,
+                            version.minor,
+                            version.micro,
+                            version.patch,
+                            null
+                    )
 
-                        val license = root.appendNode("licenses").appendNode("license")
-                        license.appendNode("name", "The Apache Software License, Version 2.0")
-                        license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                        license.appendNode("distribution", "repo")
+                    maven.version = clean.toString()
 
-                        val dependenciesNode = root.appendNode("dependencies")
-                        project.logger.quiet("""Project Object Model
-                                   |====================
-                                   |${project.group}:${maven.artifactId}:${project.version}
-                                   |Deps""".trimMargin("|"))
-
-                        mutableListOf(
-                                DependencyTransform.TestImplementation,
-                                DependencyTransform.Implementation,
-                                DependencyTransform.Api,
-                                DependencyTransform.CompileOnly
-                        ).apply {
-                            if (!publication.includeTest) {
-                                removeAt(0)
-                            }
-                        }.flatMap { transform ->
-                            project.configurations.findByName(transform.configuration)?.let {
-                                it.allDependencies.mapNotNull {
-                                    it.takeIf { it.group != null }?.let {
-                                        // dependencies[key] =
-                                        DependencyData(
-                                                it.group,
-                                                it.name,
-                                                it.version,
-                                                transform.scope
-                                        )
-                                    }
-                                }
-                            } ?: emptyList()
-                        }.associateBy {
-                            "${it.group}:${it.artifact}:${it.version}"
-                        }.forEach {
-                            val value = it.value
-                            project.logger
-                                    .quiet("""  ${value.scope}: ${value.group}:${value.artifact}:${value.version}""")
-
-                            val dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", value.group)
-                            dependencyNode.appendNode("artifactId", value.artifact)
-                            dependencyNode.appendNode("version", value.version)
-                            dependencyNode.appendNode("scope", value.scope)
-                        }
-
-                        project.logger.quiet("")
-                    }
+                    writePom(maven, project)
                 }
             }
+        }
+    }
+
+    private fun writePom(maven: MavenPublication, project: Project) {
+        if (opts.isAndroidLibrary) {
+            maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.aar")
+        } else {
+            maven.artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
+        }
+
+        maven.pom.withXml { it ->
+            val root = it.asNode()
+
+            val license = root.appendNode("licenses").appendNode("license")
+            license.appendNode("name", "The Apache Software License, Version 2.0")
+            license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
+            license.appendNode("distribution", "repo")
+
+            val dependenciesNode = root.appendNode("dependencies")
+            project.logger.quiet("""Project Object Model
+                                       |====================
+                                       |${project.group}:${maven.artifactId}:${project.version}
+                                       |Deps""".trimMargin("|"))
+
+            mutableListOf(
+                    DependencyTransform.TestImplementation,
+                    DependencyTransform.Implementation,
+                    DependencyTransform.Api,
+                    DependencyTransform.CompileOnly
+            ).apply {
+                if (!publication.includeTest) {
+                    removeAt(0)
+                }
+            }.flatMap { transform ->
+                project.configurations.findByName(transform.configuration)?.let {
+                    it.allDependencies.mapNotNull {
+                        it.takeIf { it.group != null }?.let {
+                            // dependencies[key] =
+                            DependencyData(
+                                    it.group,
+                                    it.name,
+                                    it.version,
+                                    transform.scope
+                            )
+                        }
+                    }
+                } ?: emptyList()
+            }.associateBy {
+                "${it.group}:${it.artifact}:${it.version}"
+            }.forEach {
+                val value = it.value
+                project.logger
+                        .quiet("""  ${value.scope}: ${value.group}:${value.artifact}:${value.version}""")
+
+                val dependencyNode = dependenciesNode.appendNode("dependency")
+                dependencyNode.appendNode("groupId", value.group)
+                dependencyNode.appendNode("artifactId", value.artifact)
+                dependencyNode.appendNode("version", value.version)
+                dependencyNode.appendNode("scope", value.scope)
+            }
+
+            project.logger.quiet("")
         }
     }
 
@@ -292,19 +318,39 @@ class PublishPlugin : Plugin<Project> {
                 copy.into("$buildDir/libs/")
                 copy.rename("(.*)-(.*).xml", "${project.name}-${project.version}.pom")
             }
+            tasks.create("worksGenerateCleanPom", Copy::class.java) { copy ->
+                copy.dependsOn("generatePomFileForWorkCleanPublishPublication")
+                copy.from("$buildDir/publications/WorkCleanPublish")
+                copy.into("$buildDir/libs/")
+                copy.rename("(.*)-(.*).xml", "${project.name}-${project.version}-clean.pom")
+            }
+
         }
     }
 
     private fun generatePublicationTask(project: Project) {
         with(project) {
+            tasks.create("worksCleanLib", Copy::class.java) {
+                val file = moduleFile
+                if (file != null) {
+                    it.inputs.file(file)
+                    it.doFirst {
+                        File(project.buildDir, "libs").deleteRecursively()
+                    }
+                    it.from(moduleFile)
+                    it.into("$buildDir/tmp/cleanLib")
+                }
+            }
+
             tasks.create("worksCalculateChecksum") {
                 it.dependsOn(
                         "worksGenerateAssembly",
                         "worksArchiveSources",
                         "worksArchiveDocumentation",
-                        "worksGeneratePom"
+                        "worksGeneratePom",
+                        "worksGenerateCleanPom"
                 )
-
+                it.mustRunAfter("worksCleanLib")
                 it.doLast {
                     val root = file("${project.buildDir}/checksum/binary")
                     val binary = if (opts.isAndroidLibrary) {
@@ -322,14 +368,14 @@ class PublishPlugin : Plugin<Project> {
                     }.hexString()
                     file("${project.buildDir}/libs/${project.name}-${project.version}.md5").writeText(hash)
 
-                    val pom = file("${project.buildDir}/libs/${project.name}-${project.version}.pom")
+                    val pom = file("${project.buildDir}/libs/${project.name}-${project.version}-clean.pom")
                     file("${project.buildDir}/libs/${project.name}-${project.version}-pom.md5")
                             .writeText(pom.md5().hexString())
                 }
             }
 
             tasks.create("worksGeneratePublication") {
-                it.dependsOn("worksCalculateChecksum")
+                it.dependsOn("worksCleanLib", "worksCalculateChecksum")
                 it.group = "publishing"
             }
         }

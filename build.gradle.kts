@@ -9,11 +9,15 @@ buildscript {
         maven {
             url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
         }
+        maven {
+            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/snapshot")
+        }
     }
 
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.github.ben-manes:gradle-versions-plugin:0.19.0")
+        classpath("com.mobilesolutionworks:works-publish:+")
     }
 }
 
