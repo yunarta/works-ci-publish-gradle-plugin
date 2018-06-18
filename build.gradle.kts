@@ -9,6 +9,9 @@ buildscript {
         maven {
             url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
         }
+        maven {
+            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/snapshot")
+        }
     }
 
     dependencies {
