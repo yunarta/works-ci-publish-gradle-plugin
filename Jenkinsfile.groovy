@@ -195,7 +195,7 @@ pipeline {
 }
 
 def updateVersion() {
-    def properties = writeYaml(file: 'plugin/module.properties')
+    def properties = readYaml(file: 'plugin/module.properties')
     properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
     sh "rm plugin/module.properties"
     writeYaml file: 'plugin/module.properties', data: properties
@@ -203,11 +203,11 @@ def updateVersion() {
 
 def compareArtifact(String repo, String job) {
     bintrayDownload2 repository: "mobilesolutionworks/${repo}",
-            packageInfo: writeYaml(file: 'plugin/module.properties'),
+            packageInfo: readYaml(file: 'plugin/module.properties'),
             credential: "mobilesolutionworks.jfrog.org"
 
     def same = bintrayCompare2 repository: "mobilesolutionworks/${repo}",
-            packageInfo: writeYaml(file: 'plugin/module.properties'),
+            packageInfo: readYaml(file: 'plugin/module.properties'),
             credential: "mobilesolutionworks.jfrog.org",
             path: "plugin/build/libs"
 
