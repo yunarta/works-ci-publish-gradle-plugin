@@ -195,7 +195,7 @@ pipeline {
 }
 
 def updateVersion() {
-    bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+    bintrayDownloadMatches repository: "mobilesolutionworks/snapshot",
             packageInfo: readYaml(file: 'plugin/module.yaml'),
             credential: "mobilesolutionworks.jfrog.org"
 
