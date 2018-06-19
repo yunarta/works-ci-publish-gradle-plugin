@@ -146,22 +146,6 @@ class PublishPlugin : Plugin<Project> {
 
                     writePom(maven, project)
                 }
-
-                it.create("workCleanPublish", MavenPublication::class.java) { maven ->
-                    maven.artifactId = project.name
-                    val version = VersionNumber.parse(project.version.toString())
-                    val clean = VersionNumber(
-                            version.major,
-                            version.minor,
-                            version.micro,
-                            version.patch,
-                            null
-                    )
-
-                    maven.version = clean.toString()
-
-                    writePom(maven, project)
-                }
             }
         }
     }
@@ -318,13 +302,6 @@ class PublishPlugin : Plugin<Project> {
                 copy.into("$buildDir/libs/")
                 copy.rename("(.*)-(.*).xml", "${project.name}-${project.version}.pom")
             }
-            tasks.create("worksGenerateCleanPom", Copy::class.java) { copy ->
-                copy.dependsOn("generatePomFileForWorkCleanPublishPublication")
-                copy.from("$buildDir/publications/WorkCleanPublish")
-                copy.into("$buildDir/libs/")
-                copy.rename("(.*)-(.*).xml", "${project.name}-${project.version}-clean.pom")
-            }
-
         }
     }
 
@@ -347,8 +324,7 @@ class PublishPlugin : Plugin<Project> {
                         "worksGenerateAssembly",
                         "worksArchiveSources",
                         "worksArchiveDocumentation",
-                        "worksGeneratePom",
-                        "worksGenerateCleanPom"
+                        "worksGeneratePom"
                 )
                 it.mustRunAfter("worksCleanLib")
                 it.doLast {
@@ -367,10 +343,6 @@ class PublishPlugin : Plugin<Project> {
                         }
                     }.hexString()
                     file("${project.buildDir}/libs/${project.name}-${project.version}.md5").writeText(hash)
-
-                    val pom = file("${project.buildDir}/libs/${project.name}-${project.version}-clean.pom")
-                    file("${project.buildDir}/libs/${project.name}-${project.version}-pom.md5")
-                            .writeText(pom.md5().hexString())
                 }
             }
 
