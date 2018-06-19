@@ -137,7 +137,7 @@ pipeline {
 
                     steps {
                         echo "Compare snapshot"
-                        compareArtifact("snapshot", "integrate/snapshot")
+                        compareArtifact("snapshot", "integrate/snapshot", false)
                     }
                 }
 
@@ -150,7 +150,7 @@ pipeline {
 
                     steps {
                         echo "Compare release"
-                        compareArtifact("release", "integrate/release")
+                        compareArtifact("release", "integrate/release", false)
                     }
                 }
             }
@@ -211,10 +211,12 @@ def updateVersion() {
     writeYaml file: 'plugin/module.yaml', data: properties
 }
 
-def compareArtifact(String repo, String job) {
-    bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
-            packageInfo: readYaml(file: 'plugin/module.yaml'),
-            credential: "mobilesolutionworks.jfrog.org"
+def compareArtifact(String repo, String job, boolean download) {
+    if (download) {
+        bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+                packageInfo: readYaml(file: 'plugin/module.yaml'),
+                credential: "mobilesolutionworks.jfrog.org"
+    }
 
     def same = bintrayCompare repository: "mobilesolutionworks/${repo}",
             packageInfo: readYaml(file: 'plugin/module.yaml'),
