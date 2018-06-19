@@ -137,7 +137,7 @@ pipeline {
 
                     steps {
                         echo "Compare snapshot"
-                        compareArtifact("snapshot", "integrate/snapshot")
+                        compareArtifact("snapshot", "integrate/snapshot", false)
                     }
                 }
 
@@ -150,7 +150,7 @@ pipeline {
 
                     steps {
                         echo "Compare release"
-                        compareArtifact("release", "integrate/release")
+                        compareArtifact("release", "integrate/release", false)
                     }
                 }
             }
@@ -195,16 +195,28 @@ pipeline {
 }
 
 def updateVersion() {
+    bintrayDownloadMatches repository: "mobilesolutionworks/snapshot",
+            packageInfo: readYaml(file: 'plugin/module.yaml'),
+            credential: "mobilesolutionworks.jfrog.org"
+
     def properties = readYaml(file: 'plugin/module.yaml')
-    properties.version = properties.version + "-BUILD-${BUILD_NUMBER}"
+    def incremented = versionIncrementQualifier()
+    if (incremented != null) {
+        properties.version = incremented
+    } else {
+        properties.version = properties.version + "-BUILD-1"
+    }
+
     sh "rm plugin/module.yaml"
     writeYaml file: 'plugin/module.yaml', data: properties
 }
 
-def compareArtifact(String repo, String job) {
-    bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
-            packageInfo: readYaml(file: 'plugin/module.yaml'),
-            credential: "mobilesolutionworks.jfrog.org"
+def compareArtifact(String repo, String job, boolean download) {
+    if (download) {
+        bintrayDownloadMatches repository: "mobilesolutionworks/${repo}",
+                packageInfo: readYaml(file: 'plugin/module.yaml'),
+                credential: "mobilesolutionworks.jfrog.org"
+    }
 
     def same = bintrayCompare repository: "mobilesolutionworks/${repo}",
             packageInfo: readYaml(file: 'plugin/module.yaml'),
