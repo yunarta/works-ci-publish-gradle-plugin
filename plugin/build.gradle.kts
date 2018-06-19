@@ -38,7 +38,7 @@ jacoco {
 }
 
 detekt {
-    version = "1.0.0.RC6-4"
+    version = "1.0.0.RC7-2"
 
     profile("main", Action {
         input = "src/main/kotlin"
