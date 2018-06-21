@@ -16,7 +16,6 @@ import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.internal.logging.text.StyledTextOutput
 import org.gradle.internal.logging.text.StyledTextOutputFactory
 import org.gradle.jvm.tasks.Jar
-import org.gradle.util.VersionNumber
 import java.io.File
 import java.util.*
 
@@ -137,16 +136,11 @@ class PublishPlugin : Plugin<Project> {
     }
 
     internal fun createPOM(project: Project, extensions: ExtensionContainer) {
-        val it = extensions.findByName("publishing")
-        if (it != null && it is PublishingExtension) {
-            it.publications {
-                it.create("workPublish", MavenPublication::class.java) { maven ->
-                    maven.artifactId = project.name
-                    maven.version = project.version.toString()
-
-                    writePom(maven, project)
-                }
-            }
+        extensions.configure(PublishingExtension::class.java) {
+            val maven = it.publications.maybeCreate("workPublish", MavenPublication::class.java)
+            maven.artifactId = project.name
+            maven.version = project.version.toString()
+            writePom(maven, project)
         }
     }
 

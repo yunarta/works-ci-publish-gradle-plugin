@@ -2,11 +2,9 @@ import com.mobilesolutionworks.gradle.publish.PublishedDoc
 import com.mobilesolutionworks.gradle.publish.worksPublication
 
 plugins {
+    `java-gradle-plugin`
     `java-library`
-}
-
-apply {
-    plugin("works-publish")
+    id("works-publish")
 }
 
 group = "com.mobilesolutionworks"
