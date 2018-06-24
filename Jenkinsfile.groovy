@@ -126,7 +126,6 @@ pipeline {
                 }
             }
 
-
             parallel {
                 stage("Snapshot") {
                     when {

@@ -66,7 +66,7 @@ internal class PublishOptions {
     var configurator: ProjectConfigurator = JavaLibConfigurator()
 }
 
-val Project.worksPublication: Publication?
+internal val Project.worksPublish: Publication?
     get() {
         return extensions.findByName("publication") as? Publication
     }
@@ -92,7 +92,7 @@ class PublishPlugin : Plugin<Project> {
      */
     override fun apply(project: Project) {
         with(project) {
-            publication = extensions.create("publication", Publication::class.java)
+            publication = extensions.create("worksPublish", Publication::class.java)
             createLogWriter(this)
 
             project.afterEvaluate {

@@ -1,4 +1,4 @@
-group: com.mobilesolutionworks
+group: com.mobilesolutionworks.gradle
 artifact: works-publish
 name: works-publish
 version: 1.5.3

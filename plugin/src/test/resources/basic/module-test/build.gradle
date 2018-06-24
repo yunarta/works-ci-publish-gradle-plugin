@@ -1,9 +1,12 @@
+plugins {
+    id 'com.mobilesolutionworks.gradle.publish'
+}
+
 apply plugin: 'java-library'
-apply plugin: 'works-publish'
 
 group 'com.default'
 version '1.0.0'
 
-publication {
+worksPublish {
     module = file("module.properties")
 }

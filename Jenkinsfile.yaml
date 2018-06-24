@@ -1,0 +1,24 @@
+node: android
+commands:
+  check:
+  - ./gradlew clean automationTest
+  - ./gradlew automationCheck
+
+  buildSnapshot:
+  - ./gradlew clean test worksGeneratePublication
+
+  buildRelease:
+  - ./gradlew clean worksGeneratePublication
+
+feature:
+  codecov: codecov-token
+
+publishing:
+  snapshot: true
+  repository: bintray
+  packages:
+  - plugin/module.yaml
+
+publisher:
+  bintray:
+    credential: mobilesolutionworks.jfrog.org

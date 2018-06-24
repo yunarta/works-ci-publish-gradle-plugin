@@ -1,8 +1,8 @@
 plugins {
     id "java"
+    id 'com.mobilesolutionworks.gradle.publish'
 }
 
-apply plugin: 'works-publish'
 
 group 'com.mobilesolutionworks'
 version '1.0.0'

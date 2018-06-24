@@ -1,11 +1,14 @@
+plugins {
+    id 'com.mobilesolutionworks.gradle.publish'
+}
+
 apply plugin: 'java-library'
 apply plugin: 'org.jetbrains.kotlin.jvm'
-apply plugin: 'works-publish'
 apply plugin: 'org.jetbrains.dokka'
 
 version '1.0.0'
 
-publication {
+worksPublish {
     javadoc = "kotlin"
     includeTest = true
 }

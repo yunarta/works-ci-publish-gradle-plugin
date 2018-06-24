@@ -1,5 +1,7 @@
-apply plugin: 'com.android.library'
-apply plugin: 'works-publish'
+plugins {
+    id 'com.android.library'
+    id 'com.mobilesolutionworks.gradle.publish'
+}
 
 version "1.0.0"
 

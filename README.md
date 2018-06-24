@@ -53,7 +53,7 @@ publication {
 
 module **build.gradle.kts**
 ```kotlin
-import com.mobilesolutionworks.gradle.publish.worksPublication
+import com.mobilesolutionworks.gradle.publish.worksPublish
 
 apply {
     plugin("works-publish")

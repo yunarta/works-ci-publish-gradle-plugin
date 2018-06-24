@@ -16,11 +16,11 @@ class PublishPluginTests {
         val extensions = Mockito.mock(ExtensionContainer::class.java)
         whenever(project.extensions).thenReturn(extensions)
 
-        assertNull(project.worksPublication)
+        assertNull(project.worksPublish)
 
         val publication = Publication()
         whenever(extensions.findByName("publication")).thenReturn(publication)
-        assertEquals(publication, project.worksPublication)
+        assertEquals(publication, project.worksPublish)
     }
 
 }
