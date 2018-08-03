@@ -12,10 +12,6 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    environment {
-        JFROGCLI = "${tool 'JfrogCLI'}"
-    }
-
     stages {
         stage('Select') {
             parallel {
