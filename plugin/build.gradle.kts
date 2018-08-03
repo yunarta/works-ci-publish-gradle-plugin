@@ -1,5 +1,4 @@
 import com.mobilesolutionworks.gradle.publish.PublishedDoc
-import com.mobilesolutionworks.gradle.publish.worksPublication
 import groovy.json.JsonSlurper
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -19,7 +18,7 @@ plugins {
 
 }
 
-worksPublication?.apply {
+publication {
     javadoc = PublishedDoc.Kotlin
     module = file("module.yaml")
 }
@@ -113,14 +112,6 @@ pluginBundle {
 
 tasks.withType<PluginUnderTestMetadata> {
     pluginClasspath += configurations["pluginRuntime"].asFileTree
-//    println("compileOnly")
-//    configurations["compileOnly"].asFileTree.forEach {
-//        println(" - $it")
-//    }
-    println("PluginUnderTestMetadata")
-    pluginClasspath.forEach {
-        println(" - $it")
-    }
 }
 
 tasks.withType<Delete>().whenObjectAdded {
