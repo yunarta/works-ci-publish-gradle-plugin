@@ -14,7 +14,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
     id("org.jetbrains.dokka") version "0.9.17"
     id("com.gradle.plugin-publish") version "0.9.10"
-    id("com.mobilesolutionworks.gradle.jacoco") version "1.0.0"
+    id("com.mobilesolutionworks.gradle.jacoco") version "1.1.3"
     id("com.mobilesolutionworks.gradle.publish") version "1.5.3"
 
 }
