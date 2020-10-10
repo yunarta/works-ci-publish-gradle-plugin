@@ -1,6 +1,6 @@
 package com.mobilesolutionworks.gradle.publish
 
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockitokotlin2.whenever
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.junit.Assert.assertEquals

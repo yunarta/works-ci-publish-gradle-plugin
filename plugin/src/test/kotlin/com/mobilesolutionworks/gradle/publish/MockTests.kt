@@ -1,8 +1,8 @@
 package com.mobilesolutionworks.gradle.publish;
 
-import com.nhaarman.mockito_kotlin.atLeastOnce
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockitokotlin2.atLeastOnce
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtensionContainer

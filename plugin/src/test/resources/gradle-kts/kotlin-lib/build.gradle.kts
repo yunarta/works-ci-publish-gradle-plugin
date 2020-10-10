@@ -1,5 +1,5 @@
+import com.mobilesolutionworks.gradle.publish.Publication
 import com.mobilesolutionworks.gradle.publish.PublishedDoc
-import com.mobilesolutionworks.gradle.publish.worksPublication
 
 plugins {
     `java-library`
@@ -12,7 +12,10 @@ apply {
 group = "com.mobilesolutionworks"
 version = "1.0-SNAPSHOT"
 
-worksPublication?.apply {
+val org.gradle.api.Project.`worksPublish`: com.mobilesolutionworks.gradle.publish.Publication get() =
+    extensions.findByName("publication") as Publication
+
+worksPublish.apply {
     javadoc = PublishedDoc.Kotlin
     module = file("module.properties")
 }

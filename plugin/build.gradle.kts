@@ -1,7 +1,4 @@
 import com.mobilesolutionworks.gradle.publish.PublishedDoc
-import com.mobilesolutionworks.gradle.publish.worksPublication
-import groovy.json.JsonSlurper
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.*
 
@@ -11,8 +8,9 @@ plugins {
     jacoco
     maven
 
-    id("io.gitlab.arturbosch.detekt") version "1.0.0.RC7-2"
-    id("org.jetbrains.dokka") version "0.9.17"
+    id("io.gitlab.arturbosch.detekt") version "1.14.0"
+    id("org.jetbrains.dokka") version "0.10.1"
+    id("com.mobilesolutionworks.gradle.publish") version "1.5.3"
 }
 
 apply {
@@ -20,53 +18,51 @@ apply {
     plugin("works-publish")
 }
 
-worksPublication?.apply {
+worksPublish.apply {
     javadoc = PublishedDoc.Kotlin
     module = file("module.yaml")
 }
 
 val kotlinVersion: String by rootProject.extra
-val sourceSets: SourceSetContainer = java.sourceSets
+//val sourceSets: SourceSetContainer = java.sourceSets
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = "0.8.5"
     reportsDir = file("$buildDir/reports")
 }
 
 detekt {
-    version = "1.0.0.RC6-4"
+    toolVersion = "1.14.1"
 
-    profile("main", Action {
-        input = "src/main/kotlin"
-        filters = ".*/resources/.*,.*/build/.*"
-        config = file("default-detekt-config.yml")
-        output = "$buildDir/reports/detekt"
-        outputName = "detekt-report"
-        baseline = "reports/baseline.xml"
-    })
+        input = files("src/main/kotlin")
+//        filters = ".*/resources/.*,.*/build/.*"
+        config = files("default-detekt-config.yml")
+//        output = "$buildDir/reports/detekt"
+//        outputName = "detekt-report"
+//        baseline = "reports/baseline.xml"
 }
 
 //val jacocoAnt by configurations.creating
 val jacocoRuntime by configurations.creating
 
 dependencies {
-    jacocoRuntime("org.jacoco:org.jacoco.agent:0.8.1")
+    jacocoRuntime("org.jacoco:org.jacoco.agent:0.8.5")
 
     testImplementation("junit", "junit", "4.12")
     testImplementation(gradleTestKit())
 
     afterEvaluate {
-        testRuntime(files(tasks.findByName("createClasspathManifest")))
-        testRuntime(files(tasks.findByName("setupJacocoAgent")))
+        testRuntimeOnly(files(tasks.findByName("createClasspathManifest")))
+        testRuntimeOnly(files(tasks.findByName("setupJacocoAgent")))
     }
 
-    testImplementation("org.mockito:mockito-core:2.19.0")
-    testImplementation("com.nhaarman:mockito-kotlin:1.5.0")
-    testImplementation("org.spockframework:spock-core:1.1-groovy-2.4") {
+    testImplementation("org.mockito:mockito-core:3.5.13")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+    testImplementation("org.spockframework:spock-core:1.3-groovy-2.4") {
         exclude(group = "org.codehaus.groovy")
     }
 
@@ -74,7 +70,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
 
-    compileOnly("org.jetbrains.dokka:dokka-gradle-plugin:0.9.17")
+    compileOnly("org.jetbrains.dokka:dokka-gradle-plugin:0.10.1")
     compileOnly("com.android.tools.build:gradle:3.1.2") {
         isTransitive = false
     }
@@ -129,15 +125,16 @@ tasks.create("jacocoCoverageTest", JacocoReport::class.java) {
     }
 
     // generated classes
-    classDirectories = fileTree(mapOf(
+
+    additionalClassDirs( fileTree(mapOf(
             "dir" to "$buildDir/classes/java/main")
     ) + fileTree(mapOf(
             "dir" to "$buildDir/classes/kotlin/main")
-    )
+    ))
 
     // sources
-    sourceDirectories = files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy"))
-    executionData = fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec"))
+    additionalSourceDirs(files(listOf("src/main/kotlin", "src/main/java", "/src/test/groovy")))
+    executionData(fileTree(mapOf("dir" to project.rootDir.absolutePath, "include" to "**/build/jacoco/*.exec")))
 }
 
 tasks.create("automationTest") {
@@ -215,59 +212,3 @@ tasks.withType<Test> {
         logger.quiet("Test with max $maxParallelForks parallel forks")
     }
 }
-
-//tasks.create("worksArchiveDocumentation", Jar::class.java) {
-//    dependsOn("dokka")
-//
-//    classifier = "javadoc"
-//    from((tasks.findByPath("dokka") as DokkaTask).outputDirectory)
-//}
-//
-//tasks.create("worksArchiveSources", Jar::class.java) {
-//    classifier = "sources"
-//    from(sourceSets["main"].java.srcDirs)
-//}
-//
-//project.afterEvaluate {
-//    extensions.findByType(PublishingExtension::class.java)?.let {
-//        it.publications {
-//            create("projectRelease", MavenPublication::class.java) {
-//                artifactId = project.name
-//                version = project.version.toString()
-//
-//                artifact("${project.buildDir}/libs/${project.name}-${project.version}.jar")
-//
-//                pom.withXml {
-//                    val root = asNode()
-//
-//                    val license = root.appendNode("licenses").appendNode("license")
-//                    license.appendNode("name", "The Apache Software License, Version 2.0")
-//                    license.appendNode("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-//                    license.appendNode("distribution", "repo")
-//
-//                    val dependenciesNode = root.appendNode("dependencies")
-//                    project.configurations.getAt("implementation").dependencies.forEach {
-//                        val dependencyNode = dependenciesNode.appendNode("dependency")
-//                        dependencyNode.appendNode("groupId", it.group)
-//                        dependencyNode.appendNode("artifactId", it.name)
-//                        dependencyNode.appendNode("version", it.version)
-//                        dependencyNode.appendNode("scope", "runtime")
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    tasks.create("worksGeneratePom", Copy::class.java) {
-//
-//        dependsOn("generatePomFileForProjectReleasePublication")
-//        from("$buildDir/publications/projectRelease")
-//        into("$buildDir/libs/")
-//        rename("(.*)-(.*).xml", "${project.name}-${version}.pom")
-//    }
-//
-//    tasks.create("worksGeneratePublication") {
-//        group = "publishing"
-//        dependsOn("assemble", "worksArchiveSources", "worksArchiveDocumentation", "worksGeneratePom")
-//    }
-//}

@@ -1,27 +1,10 @@
-autoCorrect: true
-failFast: false
-
-test-pattern: # Configure exclusions for test sources
-  active: true
-  patterns: # Test file regexes
-    - '.*/test/.*'
-    - '.*Test.kt'
-    - '.*Spec.kt'
-  exclude-rule-sets:
-    - 'comments'
-  exclude-rules:
-    - 'NamingRules'
-    - 'WildcardImport'
-    - 'MagicNumber'
-    - 'MaxLineLength'
-    - 'LateinitUsage'
-    - 'StringLiteralDuplication'
-    - 'SpreadOperator'
-    - 'TooManyFunctions'
+# autoCorrect: true
+# failFast: false
 
 build:
-  warningThreshold: 5
-  failThreshold: 10
+  excludeCorrectable: false
+#  warningThreshold: 5
+#  failThreshold: 10
   maxIssues: 10
   weights:
     # complexity: 2
@@ -95,7 +78,8 @@ complexity:
     threshold: 20
   LongParameterList:
     active: true
-    threshold: 6
+    functionThreshold: 6
+    constructorThreshold: 6
     ignoreDefaultParameters: false
   MethodOverloading:
     active: false

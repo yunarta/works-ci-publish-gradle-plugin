@@ -1,23 +1,23 @@
 buildscript {
     var kotlinVersion: String by extra
-    kotlinVersion = "1.2.50"
+    kotlinVersion = "1.4.10"
 
     repositories {
         jcenter()
         google()
         mavenCentral()
-        maven {
-            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
-        }
-        maven {
-            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/snapshot")
-        }
+//        maven {
+//            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/release")
+//        }
+//        maven {
+//            url = java.net.URI("https://dl.bintray.com/mobilesolutionworks/snapshot")
+//        }
     }
 
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.github.ben-manes:gradle-versions-plugin:0.19.0")
-        classpath("com.mobilesolutionworks:works-publish:+")
+//        classpath("gradle.plugin.com.mobilesolutionworks.gradle:works-publish:+")
     }
 }
 

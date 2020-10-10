@@ -57,13 +57,19 @@ abstract class TestKitBaseSpecification extends Specification {
         buildGradle.write("""
             |buildscript {
             |    repositories {
-            |        google()
-            |        jcenter()
+            |        if (System.getProperty("localMaven") != null) {
+            |            maven {
+            |                url System.getProperty("localMaven")
+            |            }
+            |        } else {
+            |            google()
+            |            jcenter()
+            |        }
             |    }
             |
             |    dependencies {
-            |        classpath 'com.android.tools.build:gradle:3.1.2'
-            |        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41'
+            |        classpath 'com.android.tools.build:gradle:4.0.2'
+            |        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10'
             |        classpath 'org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.17'
             |        classpath files($classpathString)
             |    }
@@ -71,16 +77,22 @@ abstract class TestKitBaseSpecification extends Specification {
             |
             |allprojects {
             |   repositories {
-            |       google()
-            |       jcenter()
-            |   }
+            |        if (System.getProperty("localMaven") != null) {
+            |            maven {
+            |                url System.getProperty("localMaven")
+            |            }
+            |        } else {
+            |            google()
+            |            jcenter()
+            |        }
+            |    }
             |}
         """.stripMargin('|'))
 
         gradleRunner = GradleRunner.create()
                 .withProjectDir(testDir.root)
                 .withPluginClasspath()
-                .withGradleVersion("4.8")
+                .withGradleVersion("6.6")
                 .withPluginClasspath(pluginClasspath)
                 .forwardOutput()
     }
